@@ -15,11 +15,11 @@ export default function TaskList() {
   }
 
   return (
-    <div className="bg-zinc-900 rounded-lg border border-zinc-800 p-6">
-      <h2 className="text-xl font-semibold text-white mb-4">Tasks</h2>
+    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-lg hover:border-blue-500/40 hover:shadow-blue-500/10 transition-all duration-200">
+      <h2 className="text-lg font-semibold text-white mb-4">Tasks</h2>
 
       {/* Tasks List */}
-      <div className="space-y-2 mb-4">
+      <div className="space-y-4 mb-4">
         {tasks.map((task) => (
           <div
             key={task.id}
@@ -33,7 +33,7 @@ export default function TaskList() {
             />
             <span
               className={`flex-1 text-sm ${
-                task.completed ? 'line-through text-zinc-500' : 'text-zinc-200'
+                task.completed ? 'line-through text-zinc-400' : 'text-zinc-200'
               }`}
             >
               {task.title}
