@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { GreetingHeader } from '@/features/work/components/GreetingHeader'
 import { Hero } from '@/features/work/components/Hero'
 import { TaskList } from '@/features/work/components/TaskListRefactored'
 import { FocusTimer } from '@/features/work/components/FocusTimerRefactored'
@@ -48,6 +49,7 @@ export default function WorkPage() {
     <div
       style={{
         display: 'flex',
+        flexDirection: 'column',
         gap: 16,
         padding: 20,
         background: '#09090b',
@@ -55,22 +57,35 @@ export default function WorkPage() {
         fontFamily: 'Syne, sans-serif',
       }}
     >
-      {/* LEFT MAIN */}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-          <Hero goal={goal} onGoalChange={setGoal} />
-          <TaskList newTask={newTask} onNewTaskChange={setNewTask} />
-          <FocusTimer />
-          <ProjectGrid projects={PROJECTS} />
-          <ScheduleList schedule={SCHEDULE} />
-        </div>
+      {/* GREETING HEADER */}
+      <div style={{ marginBottom: 24 }}>
+        <GreetingHeader />
       </div>
 
-      {/* RIGHT PANEL */}
-      <div style={{ width: 280, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <QuickStats stats={STATS} />
-        <IdeasPanel />
-        <LinksPanel links={LINKS} />
+      {/* MAIN CONTENT */}
+      <div
+        style={{
+          display: 'flex',
+          gap: 16,
+        }}
+      >
+        {/* LEFT MAIN */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <Hero goal={goal} onGoalChange={setGoal} />
+            <TaskList newTask={newTask} onNewTaskChange={setNewTask} />
+            <FocusTimer />
+            <ProjectGrid projects={PROJECTS} />
+            <ScheduleList schedule={SCHEDULE} />
+          </div>
+        </div>
+
+        {/* RIGHT PANEL */}
+        <div style={{ width: 280, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <QuickStats stats={STATS} />
+          <IdeasPanel />
+          <LinksPanel links={LINKS} />
+        </div>
       </div>
     </div>
   )

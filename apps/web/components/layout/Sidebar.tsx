@@ -32,7 +32,7 @@ export default function Sidebar() {
         {/* HEADER */}
         <div className="px-5 py-6 border-b border-zinc-800 flex items-center justify-between">
           <span className="mc-mono text-sm font-semibold text-zinc-100 tracking-wide">
-            DAILY_OS
+            NEXUS
           </span>
           <span className="text-xs text-zinc-400/80 mc-mono tracking-wide">v1.0</span>
         </div>
