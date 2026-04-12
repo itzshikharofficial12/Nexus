@@ -21,11 +21,25 @@ export function LayoutContent({ children }: { children: ReactNode }) {
   }
 
   const isAuthPage = pathname === '/login'
+  const isAIPage = pathname === '/ai'
 
   if (isAuthPage) {
     return (
       <AuthProvider>
         {children}
+      </AuthProvider>
+    )
+  }
+
+  if (isAIPage) {
+    return (
+      <AuthProvider>
+        <div className="flex h-screen overflow-hidden">
+          <Sidebar />
+          <main className="flex-1 min-w-0">
+            {children}
+          </main>
+        </div>
       </AuthProvider>
     )
   }
