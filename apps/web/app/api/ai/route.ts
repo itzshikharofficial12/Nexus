@@ -4,10 +4,13 @@ import { createClient } from '@supabase/supabase-js'
 // Initialize Groq only if API key exists
 const groq = process.env.GROQ_API_KEY ? new Groq({ apiKey: process.env.GROQ_API_KEY }) : null
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-)
+// Initialize Supabase only if both URL and key exist
+const supabase = process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  ? createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    )
+  : null
 
 // Generate insights from user data
 function generateInsights(tasks: any[], events: any[], projects: any[], ideas: any[]): string[] {
@@ -52,6 +55,8 @@ function generateInsights(tasks: any[], events: any[], projects: any[], ideas: a
 
 // Detect and extract user identity information from message
 async function detectAndStoreIdentity(message: string) {
+  if (!supabase) return
+
   // Pattern: "my name is X" or "I'm X" or "I am X"
   const namePatterns = [
     /my name is ([a-zA-Z\s]+?)(?:\.|,|$)/i,
@@ -111,6 +116,13 @@ export async function POST(req: Request) {
       return new Response(JSON.stringify({ error: 'No message provided' }), {
         status: 400,
       })
+    }
+
+    if (!supabase) {
+      return Response.json(
+        { error: 'Supabase environment variables are not configured' },
+        { status: 500 }
+      )
     }
 
     // Detect and store user identity information
