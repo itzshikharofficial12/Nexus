@@ -51,6 +51,47 @@ function generateInsights(tasks: any[], events: any[], projects: any[], ideas: a
   return insights
 }
 
+// Detect and extract user identity information from message
+async function detectAndStoreIdentity(message: string) {
+  // Pattern: "my name is X" or "I'm X" or "I am X"
+  const namePatterns = [
+    /my name is ([a-zA-Z\s]+?)(?:\.|,|$)/i,
+    /i(?:'m| am) ([a-zA-Z\s]+?)(?:\.|,|$)/i,
+    /call me ([a-zA-Z\s]+?)(?:\.|,|$)/i,
+  ]
+
+  for (const pattern of namePatterns) {
+    const match = message.match(pattern)
+    if (match) {
+      const name = match[1].trim()
+      console.log(`👤 Detected name: ${name}`)
+      
+      try {
+        // Upsert name into user_memory table
+        const { data, error } = await supabase
+          .from('user_memory')
+          .upsert(
+            { key: 'name', value: name, updated_at: new Date().toISOString() },
+            { onConflict: 'key' }
+          )
+          .select()
+
+        if (error) {
+          console.error('Error storing name:', error.message)
+        } else {
+          console.log('✓ Name stored in user_memory:', name)
+        }
+      } catch (err) {
+        console.error('Error in detectAndStoreIdentity:', err)
+      }
+      
+      return name
+    }
+  }
+
+  return null
+}
+
 export async function POST(req: Request) {
   try {
     const { message, conversationId } = await req.json()
@@ -64,6 +105,9 @@ export async function POST(req: Request) {
         status: 400,
       })
     }
+
+    // Detect and store user identity information
+    await detectAndStoreIdentity(message)
 
     // Handle GET_INSIGHTS request
     if (message === 'GET_INSIGHTS') {
