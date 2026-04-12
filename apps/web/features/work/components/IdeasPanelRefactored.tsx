@@ -28,6 +28,12 @@ export function IdeasPanel() {
   const fetchData = async () => {
     console.log('FETCHING ALL IDEAS')
 
+    if (!supabase) {
+      setError('Database not configured')
+      setLoading(false)
+      return
+    }
+
     try {
       setLoading(true)
 

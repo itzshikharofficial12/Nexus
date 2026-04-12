@@ -23,6 +23,11 @@ export function TaskList({ newTask, onNewTaskChange }: TaskListProps) {
 
   const fetchTasks = async () => {
     try {
+      if (!supabase) {
+        setError('Database not configured')
+        setLoading(false)
+        return
+      }
       setLoading(true)
       const { data, error: supabaseError } = await supabase
         .from('tasks').select('*').order('created_at', { ascending: false })
