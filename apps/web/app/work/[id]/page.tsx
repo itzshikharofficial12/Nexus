@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation'
 import { createClient } from '@supabase/supabase-js'
 import TaskList from '@/features/work/components/TaskList'
 import { IdeasPanel } from '@/features/work/components/IdeasPanelRefactored'
+import { getVSCodeUrl } from '@/lib/github'
 
 const supabase = process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   ? createClient(
@@ -104,6 +105,20 @@ export default function ProjectDetailPage() {
 
     // redirect after delete
     router.push("/work")
+  }
+
+  const handleBuild = () => {
+    if (!project?.github_url) return
+
+    const vscodeUrl = getVSCodeUrl(project.github_url)
+
+    if (!vscodeUrl) {
+      console.error('Invalid GitHub URL')
+      return
+    }
+
+    // Open VS Code web editor
+    window.open(vscodeUrl, "_blank")
   }
 
   if (loading) {
@@ -286,6 +301,38 @@ export default function ProjectDetailPage() {
             >
               DELETE
             </button>
+            {project?.github_url && (
+              <button
+                onClick={handleBuild}
+                style={{
+                  fontSize: 11,
+                  letterSpacing: '0.05em',
+                  textTransform: 'uppercase',
+                  color: '#60a5fa',
+                  border: '1px solid rgba(59,130,246,0.2)',
+                  padding: '6px 12px',
+                  borderRadius: '6px',
+                  background: 'transparent',
+                  cursor: 'pointer',
+                  fontFamily: 'JetBrains Mono, monospace',
+                  transition: 'all 0.2s',
+                }}
+                onMouseEnter={(e) => {
+                  const el = e.currentTarget as HTMLButtonElement
+                  el.style.color = '#93c5fd'
+                  el.style.background = 'rgba(59,130,246,0.1)'
+                  el.style.borderColor = 'rgba(59,130,246,0.3)'
+                }}
+                onMouseLeave={(e) => {
+                  const el = e.currentTarget as HTMLButtonElement
+                  el.style.color = '#60a5fa'
+                  el.style.background = 'transparent'
+                  el.style.borderColor = 'rgba(59,130,246,0.2)'
+                }}
+              >
+                OPEN IN VSCODE
+              </button>
+            )}
           </div>
 
           {/* Title */}
