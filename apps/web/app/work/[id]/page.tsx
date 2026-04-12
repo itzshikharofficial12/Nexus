@@ -116,7 +116,8 @@ export default function ProjectDetailPage() {
     const vscodeUrl = getVSCodeUrl(project.github_url)
 
     if (!vscodeUrl) {
-      console.error('Failed to generate VS Code URL from:', project.github_url)
+      console.error('Failed to generate VS Code URL. GitHub URL must be in format: https://github.com/owner/repo (e.g., https://github.com/vercel/next.js)')
+      console.error('Current URL:', project.github_url)
       return
     }
 
