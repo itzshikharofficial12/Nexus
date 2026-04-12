@@ -246,6 +246,27 @@ export async function POST(req: Request) {
 
     console.log(`📨 Sending ${messagesForAI.length} messages to AI (including current)`)
 
+    // Fetch user memory for context
+    let memoryContext = ''
+    try {
+      const { data: memory, error: memoryError } = await supabase
+        .from('user_memory')
+        .select('*')
+
+      if (memoryError) {
+        console.error('Error fetching user memory:', memoryError)
+      } else if (memory && memory.length > 0) {
+        memoryContext = memory
+          .map((m: any) => `${m.key}: ${m.value}`)
+          .join('\n')
+        console.log(`📝 User memory:\n${memoryContext}`)
+      } else {
+        console.log('ℹ No user memory stored yet')
+      }
+    } catch (err) {
+      console.error('Error in memory fetch:', err)
+    }
+
     const completion = await groq.chat.completions.create({
       model: 'llama-3.1-8b-instant',
       messages: [
@@ -295,6 +316,9 @@ ${projectContext}
 
 IDEAS:
 ${ideaContext}
+
+USER MEMORY:
+${memoryContext || 'None'}
 
 If data is missing, say "No data available"`,
         },
