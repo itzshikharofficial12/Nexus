@@ -18,6 +18,8 @@ export function IdeasPanel() {
   const [savedIdea, setSavedIdea] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [editingId, setEditingId] = useState<number | null>(null)
+  const [editValue, setEditValue] = useState('')
 
   useEffect(() => {
     fetchData()
@@ -98,6 +100,38 @@ export function IdeasPanel() {
     }
   }
 
+  const handleEditIdea = (ideaId: number, currentContent: string) => {
+    setEditingId(ideaId)
+    setEditValue(currentContent)
+  }
+
+  const handleSaveEdit = async (ideaId: number) => {
+    if (!editValue.trim()) {
+      setEditingId(null)
+      return
+    }
+
+    try {
+      const { error } = await supabase
+        .from('ideas')
+        .update({ content: editValue })
+        .eq('id', ideaId)
+
+      if (error) {
+        console.error('IDEA UPDATE ERROR:', error.message || error)
+        return
+      }
+
+      console.log('Idea updated successfully')
+      setIdeas((prev) =>
+        prev.map((item) => (item.id === ideaId ? { ...item, content: editValue } : item))
+      )
+      setEditingId(null)
+    } catch (err) {
+      console.error('Edit save error:', err)
+    }
+  }
+
   return (
     <>
       <div className="mc-root mc-card" style={{ padding: 0 }}>
@@ -141,7 +175,7 @@ export function IdeasPanel() {
                 {ideas.map((item, i) => (
                   <div
                     key={item.id}
-                    className="group flex justify-between items-start gap-2"
+                    className="group flex justify-between items-start gap-2 hover:bg-zinc-900/40 transition-all duration-150 cursor-text"
                     style={{
                       padding: '6px 9px',
                       background: 'rgba(9,9,11,0.8)',
@@ -152,7 +186,29 @@ export function IdeasPanel() {
                   >
                     <div className="mc-mono text-xs text-zinc-400/80 flex gap-2" style={{ flex: 1 }}>
                       <span className="text-zinc-600">{String(i + 1).padStart(2, '0')}</span>
-                      <span>{item.content}</span>
+                      {editingId === item.id ? (
+                        <input
+                          autoFocus
+                          type="text"
+                          value={editValue}
+                          onChange={(e) => setEditValue(e.target.value)}
+                          onBlur={() => handleSaveEdit(item.id)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') handleSaveEdit(item.id)
+                            if (e.key === 'Escape') setEditingId(null)
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                          className="bg-transparent outline-none text-zinc-200 border-b border-zinc-700 focus:border-blue-500 transition-colors flex-1"
+                          style={{ fontSize: '0.75rem' }}
+                        />
+                      ) : (
+                        <span
+                          onClick={() => handleEditIdea(item.id, item.content)}
+                          className="hover:bg-zinc-800/50 px-1 py-0.5 rounded transition-colors"
+                        >
+                          {item.content}
+                        </span>
+                      )}
                     </div>
                     <button
                       onClick={() => handleDeleteIdea(item.id)}

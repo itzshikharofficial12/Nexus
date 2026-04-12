@@ -20,6 +20,8 @@ export default function TaskList() {
   const [input, setInput] = useState('')
   const [projectTasks, setProjectTasks] = useState<Task[]>([])
   const [loading, setLoading] = useState(false)
+  const [editingId, setEditingId] = useState<number | null>(null)
+  const [editValue, setEditValue] = useState('')
 
   console.log('TaskList component rendered')
 
@@ -93,6 +95,38 @@ export default function TaskList() {
     }
   }
 
+  const handleEditTask = (taskId: number, currentText: string) => {
+    setEditingId(taskId)
+    setEditValue(currentText)
+  }
+
+  const handleSaveEdit = async (taskId: number) => {
+    if (!editValue.trim()) {
+      setEditingId(null)
+      return
+    }
+
+    try {
+      const { error } = await supabase
+        .from('tasks')
+        .update({ text: editValue })
+        .eq('id', taskId)
+
+      if (error) {
+        console.error('TASK UPDATE ERROR:', error.message || error)
+        return
+      }
+
+      console.log('Task updated successfully')
+      setProjectTasks((prev) =>
+        prev.map((task) => (task.id === taskId ? { ...task, text: editValue } : task))
+      )
+      setEditingId(null)
+    } catch (err) {
+      console.error('Edit save error:', err)
+    }
+  }
+
   console.log('Rendering with projectTasks:', projectTasks)
 
   return (
@@ -104,7 +138,7 @@ export default function TaskList() {
         {projectTasks.map((task) => (
           <div
             key={task.id}
-            className="group flex justify-between items-center gap-3 p-3 bg-zinc-800 rounded-lg border border-zinc-700 hover:border-zinc-600 transition-colors"
+            className="group flex justify-between items-center gap-3 p-3 bg-zinc-800 rounded-lg border border-zinc-700 hover:bg-zinc-900/40 hover:border-zinc-600 transition-all duration-150 cursor-text"
           >
             <input
               type="checkbox"
@@ -112,13 +146,30 @@ export default function TaskList() {
               onChange={() => toggleTask(String(task.id))}
               className="w-4 h-4 rounded border-zinc-600 accent-blue-500 cursor-pointer"
             />
-            <span
-              className={`flex-1 text-sm ${
-                task.done ? 'line-through text-zinc-400' : 'text-zinc-200'
-              }`}
-            >
-              {task.text}
-            </span>
+            {editingId === task.id ? (
+              <input
+                autoFocus
+                type="text"
+                value={editValue}
+                onChange={(e) => setEditValue(e.target.value)}
+                onBlur={() => handleSaveEdit(task.id)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleSaveEdit(task.id)
+                  if (e.key === 'Escape') setEditingId(null)
+                }}
+                onClick={(e) => e.stopPropagation()}
+                className="flex-1 text-sm bg-transparent outline-none text-zinc-200 border-b border-zinc-700 focus:border-blue-500 transition-colors"
+              />
+            ) : (
+              <span
+                onClick={() => handleEditTask(task.id, task.text)}
+                className={`flex-1 text-sm hover:bg-zinc-900/50 px-1 py-0.5 rounded transition-colors ${
+                  task.done ? 'line-through text-zinc-400' : 'text-zinc-200'
+                }`}
+              >
+                {task.text}
+              </span>
+            )}
             <button
               onClick={() => handleDeleteTask(task.id)}
               className="opacity-0 group-hover:opacity-100 transition-opacity text-xs text-zinc-500 hover:text-red-400 cursor-pointer"
