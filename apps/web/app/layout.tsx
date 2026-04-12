@@ -1,7 +1,6 @@
-"use client";
-
 import "./globals.css";
 import Sidebar from "@/components/layout/Sidebar";
+import { KeyboardShortcutsProvider } from "@/components/KeyboardShortcutsProvider";
 
 export default function RootLayout({
   children,
@@ -11,14 +10,12 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="bg-zinc-950">
-        <div className="flex h-screen">
-          
-          {/* ✅ USE YOUR SIDEBAR COMPONENT */}
+        <KeyboardShortcutsProvider />
+        <div className="flex h-screen overflow-hidden">
           <Sidebar />
-
-          {/* Main Content */}
-          <main className="flex-1 overflow-auto">
-            <div className="p-8">{children}</div>
+          {/* No overflow-auto, no padding — each page controls its own layout */}
+          <main className="flex-1 min-w-0 overflow-auto">
+            {children}
           </main>
         </div>
       </body>

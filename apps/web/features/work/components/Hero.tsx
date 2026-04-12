@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import { useCurrentProject } from '@/store/useCurrentProject'
+import { ProjectForm } from './ProjectForm'
+import { ProjectModal } from './ProjectModal'
 
 interface Project {
   id: string | number
@@ -24,6 +26,7 @@ const DEFAULT_STACK_TAGS = ['React', 'Supabase', 'Tailwind', 'Next.js']
 
 export function Hero({ goal, onGoalChange, projects = [] }: HeroProps) {
   const { currentProjectId } = useCurrentProject()
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   // Get current project from Zustand ID, or fallback to first active
   let currentProject = projects.find((p) => p.id.toString() === currentProjectId && p.status === 'active')
@@ -31,13 +34,63 @@ export function Hero({ goal, onGoalChange, projects = [] }: HeroProps) {
     currentProject = projects.find((p) => p.status === 'active')
   }
 
-  // Use project data if available, otherwise use defaults
-  const title = currentProject?.title || 'DailyOS Dashboard'
-  const description = currentProject?.desc || 'Personal operating system · focused, intentional work'
-  const stackTags = currentProject?.tags || DEFAULT_STACK_TAGS
-  const githubUrl = currentProject?.github_url
-  const docsUrl = currentProject?.docs_url
-  const liveUrl = currentProject?.live_url
+  // If no projects, show empty state
+  if (!currentProject) {
+    return (
+      <>
+        <div className="mc-root mc-card col-span-2" style={{ padding: 0 }}>
+          <div className="mc-corner mc-corner-tl" />
+          <div className="mc-corner mc-corner-tr" />
+          <div className="mc-corner mc-corner-bl" />
+          <div className="mc-corner mc-corner-br" />
+          <div className="mc-scanline" />
+
+          {/* Top bar */}
+          <div className="mc-card-header" style={{ justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <div className="mc-dot" style={{ background: '#a1a1a1' }} />
+                <span className="mc-mono mc-label">SYS IDLE</span>
+              </div>
+              <div style={{ width: 1, height: 10, background: '#27272a' }} />
+              <span className="mc-mono mc-label">NEXUS · STANDBY</span>
+            </div>
+          </div>
+
+          {/* Empty state body */}
+          <div style={{ padding: '40px 20px', position: 'relative', zIndex: 1, textAlign: 'center' }}>
+            <p className="mc-mono" style={{ fontSize: 14, color: '#52525b', marginBottom: 24 }}>
+              No running projects detected
+            </p>
+            <p className="mc-mono" style={{ fontSize: 11, color: '#3f3f46', marginBottom: 12 }}>
+              Create a new project to get started
+            </p>
+            <button 
+              onClick={() => setIsModalOpen(true)}
+              className="mc-btn-primary" 
+              style={{ whiteSpace: 'nowrap' }}
+            >
+              ▶ New Project
+            </button>
+          </div>
+        </div>
+
+        {isModalOpen && (
+          <ProjectModal onClose={() => setIsModalOpen(false)}>
+            <ProjectForm onProjectAdded={() => setIsModalOpen(false)} />
+          </ProjectModal>
+        )}
+      </>
+    )
+  }
+
+  // Use project data
+  const title = currentProject.title
+  const description = currentProject.desc
+  const stackTags = currentProject.tags || DEFAULT_STACK_TAGS
+  const githubUrl = currentProject.github_url
+  const docsUrl = currentProject.docs_url
+  const liveUrl = currentProject.live_url
   const now = new Date()
   const ts = `${now.getUTCFullYear()}-${String(now.getUTCMonth()+1).padStart(2,'0')}-${String(now.getUTCDate()).padStart(2,'0')} ${String(now.getUTCHours()).padStart(2,'0')}:${String(now.getUTCMinutes()).padStart(2,'0')} UTC`
 

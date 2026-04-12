@@ -23,17 +23,17 @@ export function GreetingHeader() {
     <div className="flex justify-between items-center px-0 py-0">
       {/* Left: Greeting */}
       <div className="space-y-0 m-0 ">
-        <div className="text-l text-zinc-300 tracking-wide flex">
+        <div className="text-l text-zinc-300 tracking-wide flex ml-2">
           {greeting}
         </div>
 
-        <div className="text-2xl font-semibold text-zinc-100 tracking-wide">
+        <div className="text-2xl font-semibold text-zinc-100 tracking-wide ml-2">
           SHIKHAR SRIVASTAVA
         </div>
       </div>
 
       {/* Right: Status */}
-      <div className="flex ml-10 items-center gap-1.5">
+      <div className="flex ml-10 mr-3 items-center gap-1.5">
         <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
         <span className="text-xs text-zinc-400 tracking-[0.12em]">CURRENTLY ALIVE</span>
       </div>
