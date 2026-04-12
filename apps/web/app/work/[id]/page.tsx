@@ -48,6 +48,12 @@ export default function ProjectDetailPage() {
         setLoading(true)
         setError(null)
 
+        if (!supabase) {
+          setError('Database not configured')
+          setLoading(false)
+          return
+        }
+
         const { data, error } = await supabase
           .from('projects')
           .select('*')
@@ -80,6 +86,11 @@ export default function ProjectDetailPage() {
     const confirmDelete = confirm("Are you sure you want to delete this project?")
 
     if (!confirmDelete) return
+
+    if (!supabase) {
+      setError('Database not configured')
+      return
+    }
 
     const { error } = await supabase
       .from("projects")
