@@ -564,6 +564,7 @@ export default function AIPage() {
       }
       
       // If not an action, stream the response normally
+      // (Actions have confirmations saved separately above)
       if (!isAction) {
         let i = 0
         const iv = setInterval(() => {
@@ -580,6 +581,7 @@ export default function AIPage() {
             setLoading(false)
             
             // Insert AI response into database after streaming is complete
+            // Skip saving if this was an action (JSON response)
             if (conversationId) {
               ;(async () => {
                 try {
@@ -612,6 +614,8 @@ export default function AIPage() {
           }
         }, 18)
       } else {
+        // Action was handled, confirmation already saved to DB above
+        console.log('→ Action handled - raw JSON not saved to DB')
         setLoading(false)
       }
     } catch {
