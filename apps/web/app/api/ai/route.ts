@@ -280,7 +280,18 @@ export async function POST(req: Request) {
       messages: [
         {
           role: 'system',
-          content: `You are NOVA, an AI assistant inside a productivity OS.
+          content: `You are NOVA, an AI assistant.
+
+You have access to user memory.
+
+User memory:
+${memoryContext || 'None'}
+
+Rules:
+- ALWAYS use memory when answering
+- NEVER say "no data available" if memory exists
+- If user asks about themselves → use memory
+- Keep response short
 
 You can perform actions.
 
@@ -323,12 +334,7 @@ PROJECTS:
 ${projectContext}
 
 IDEAS:
-${ideaContext}
-
-USER MEMORY:
-${memoryContext || 'None'}
-
-If data is missing, say "No data available"`,
+${ideaContext}`,
         },
         ...(messagesForAI as any[]),
       ],
