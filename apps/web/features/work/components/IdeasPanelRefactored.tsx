@@ -68,6 +68,10 @@ export function IdeasPanel() {
 
   const handleSaveIdea = async () => {
     if (!idea.trim()) return
+    if (!supabase) {
+      setError('Database not configured')
+      return
+    }
     try {
       console.log('Saving global idea')
       const { data, error: supabaseError } = await supabase
@@ -87,6 +91,10 @@ export function IdeasPanel() {
   }
 
   const handleDeleteIdea = async (ideaId: number) => {
+    if (!supabase) {
+      setError('Database not configured')
+      return
+    }
     try {
       console.log('Deleting idea:', ideaId)
       const { error } = await supabase
@@ -114,6 +122,11 @@ export function IdeasPanel() {
   const handleSaveEdit = async (ideaId: number) => {
     if (!editValue.trim()) {
       setEditingId(null)
+      return
+    }
+
+    if (!supabase) {
+      setError('Database not configured')
       return
     }
 
