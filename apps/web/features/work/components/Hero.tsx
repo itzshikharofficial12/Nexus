@@ -133,7 +133,7 @@ export function Hero({ goal, onGoalChange, projects = [] }: HeroProps) {
         <div className="mc-scanline" />
 
         {/* Top bar */}
-        <div className="mc-card-header" style={{ justifyContent: 'space-between' }}>
+        <div className="mc-card-header" style={{ justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <div className="mc-dot" style={{ background: '#22c55e' }} />
@@ -142,7 +142,90 @@ export function Hero({ goal, onGoalChange, projects = [] }: HeroProps) {
             <div style={{ width: 1, height: 10, background: '#27272a' }} />
             <span className="mc-mono mc-label">NEXUS · MISSION CTRL</span>
           </div>
-          <span className="mc-mono mc-label" style={{ color: '#27272a' }}>{ts}</span>
+          
+          {/* Project links as minimal SVG icons */}
+          <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+            {githubUrl && (
+              <a
+                href={githubUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  cursor: 'pointer',
+                  transition: 'opacity 0.2s',
+                  opacity: 0.6,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLAnchorElement).style.opacity = '1'
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLAnchorElement).style.opacity = '0.6'
+                }}
+                title="Open GitHub repository"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#a1a1aa' }}>
+                  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.375 3.375 0 0 0-.975-2.438A3.375 3.375 0 0 1 16.5 9c1.657 0 3-1.343 3-3s-1.343-3-3-3c-1.195 0-2.235.575-2.895 1.458M9 5a3 3 0 0 0-3 3v4"></path>
+                </svg>
+              </a>
+            )}
+            {liveUrl && (
+              <a
+                href={liveUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  cursor: 'pointer',
+                  transition: 'opacity 0.2s',
+                  opacity: 0.6,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLAnchorElement).style.opacity = '1'
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLAnchorElement).style.opacity = '0.6'
+                }}
+                title="Open live website"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#a1a1aa' }}>
+                  <circle cx="12" cy="12" r="1"></circle>
+                  <path d="M19.07 4.93L16.58 7.42M4.93 19.07l2.49-2.49M1 12a11 11 0 0 0 22 0 11 11 0 0 0-22 0"></path>
+                  <path d="M12 1v6m0 6v6"></path>
+                  <path d="M4.22 4.22l4.24 4.24m5.08 0l4.24-4.24"></path>
+                </svg>
+              </a>
+            )}
+            {docsUrl && (
+              <a
+                href={docsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  cursor: 'pointer',
+                  transition: 'opacity 0.2s',
+                  opacity: 0.6,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLAnchorElement).style.opacity = '1'
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLAnchorElement).style.opacity = '0.6'
+                }}
+                title="Open documentation"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#a1a1aa' }}>
+                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                </svg>
+              </a>
+            )}
+            <span className="mc-mono mc-label" style={{ color: '#27272a', marginLeft: 12 }}>{ts}</span>
+          </div>
         </div>
 
         {/* Body */}
@@ -211,45 +294,6 @@ export function Hero({ goal, onGoalChange, projects = [] }: HeroProps) {
               </button>
               <button className="mc-btn-secondary">View Log</button>
               <button className="mc-btn-secondary">Settings</button>
-              
-              {/* Project links */}
-              {(githubUrl || docsUrl || liveUrl) && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 8, paddingTop: 8, borderTop: '1px solid #27272a' }}>
-                  {githubUrl && (
-                    <a
-                      href={githubUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mc-btn-secondary"
-                      style={{ fontSize: 10, padding: '6px 10px', textAlign: 'center' }}
-                    >
-                      GitHub
-                    </a>
-                  )}
-                  {docsUrl && (
-                    <a
-                      href={docsUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mc-btn-secondary"
-                      style={{ fontSize: 10, padding: '6px 10px', textAlign: 'center' }}
-                    >
-                      Docs
-                    </a>
-                  )}
-                  {liveUrl && (
-                    <a
-                      href={liveUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mc-btn-secondary"
-                      style={{ fontSize: 10, padding: '6px 10px', textAlign: 'center' }}
-                    >
-                      Live
-                    </a>
-                  )}
-                </div>
-              )}
             </div>
           </div>
         </div>
