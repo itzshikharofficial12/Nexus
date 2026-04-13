@@ -96,25 +96,37 @@ export function Hero({ goal, onGoalChange, projects = [] }: HeroProps) {
   const ts = `${now.getUTCFullYear()}-${String(now.getUTCMonth()+1).padStart(2,'0')}-${String(now.getUTCDate()).padStart(2,'0')} ${String(now.getUTCHours()).padStart(2,'0')}:${String(now.getUTCMinutes()).padStart(2,'0')} UTC`
 
   const handleLetsBuild = () => {
+    console.log('Let\'s Build clicked! githubUrl:', githubUrl)
+    
     if (!githubUrl) {
       console.warn('No GitHub URL available for this project')
+      alert('Please add a GitHub repository URL to this project first')
       return
     }
 
     const vscodeUrl = getVSCodeUrl(githubUrl)
+    console.log('Generated VS Code URL:', vscodeUrl)
 
     if (!vscodeUrl) {
       console.error('Invalid GitHub URL format. Expected: https://github.com/owner/repo')
-      // Open GitHub profile instead
-      window.open(githubUrl, '_blank')
+      console.log('Opening GitHub URL directly:', githubUrl)
+      if (typeof window !== 'undefined') {
+        window.open(githubUrl, '_blank')
+      }
       return
     }
 
     // Open GitHub repo in one tab
-    window.open(githubUrl, '_blank')
-    
-    // Open VS Code web editor in another tab
-    window.open(vscodeUrl, '_blank')
+    console.log('Opening GitHub:', githubUrl)
+    if (typeof window !== 'undefined') {
+      window.open(githubUrl, '_blank')
+      
+      // Small delay before opening VS Code to avoid blocking
+      setTimeout(() => {
+        console.log('Opening VS Code:', vscodeUrl)
+        window.open(vscodeUrl, '_blank')
+      }, 100)
+    }
   }
 
   return (
