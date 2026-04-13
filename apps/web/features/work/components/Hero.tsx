@@ -116,16 +116,10 @@ export function Hero({ goal, onGoalChange, projects = [] }: HeroProps) {
       return
     }
 
-    // Open GitHub repo in one tab
-    console.log('Opening GitHub:', githubUrl)
+    // Open VS Code web editor with the repository
+    console.log('Opening VS Code:', vscodeUrl)
     if (typeof window !== 'undefined') {
-      window.open(githubUrl, '_blank')
-      
-      // Small delay before opening VS Code to avoid blocking
-      setTimeout(() => {
-        console.log('Opening VS Code:', vscodeUrl)
-        window.open(vscodeUrl, '_blank')
-      }, 100)
+      window.open(vscodeUrl, '_blank')
     }
   }
 
