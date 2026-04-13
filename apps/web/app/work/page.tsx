@@ -84,6 +84,9 @@ export default function WorkPage() {
           desc: project.description,  // Map DB 'description' to 'desc'
           status: project.status,
           tags: project.tech_stack || [],  // Map DB 'tech_stack' to 'tags'
+          github_url: project.github_url,
+          docs_url: project.docs_url,
+          live_url: project.live_url,
         }))
         setProjects(mappedProjects)
       } else {
