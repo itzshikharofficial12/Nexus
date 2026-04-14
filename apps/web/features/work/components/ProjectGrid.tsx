@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { MC_STYLES } from './mc-styles'
 import { ProjectForm } from './ProjectForm'
@@ -21,21 +21,66 @@ interface ProjectGridProps {
 }
 
 const STATUS_MAP: Record<string, { dot: string; cls: string; label: string }> = {
-  active:  { dot: '#3b82f6', cls: 'mc-badge-active',  label: 'ACTIVE'  },
-  review:  { dot: '#f59e0b', cls: 'mc-badge-review',  label: 'REVIEW'  },
-  planned: { dot: '#52525b', cls: 'mc-badge-planned', label: 'PLANNED' },
+  active:  { dot: '#22c55e', cls: 'mc-badge-active',  label: 'ACTIVE'  },
+  review:  { dot: '#3b82f6', cls: 'mc-badge-review',  label: 'REVIEW'  },
+  planned: { dot: '#a1a1aa', cls: 'mc-badge-planned', label: 'PLANNED' },
 }
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-)
+const STATUS_OPTIONS = ['planned', 'active', 'review']
+
+const supabase = process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  ? createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    )
+  : null
 
 export function ProjectGrid({ projects, onProjectAdded }: ProjectGridProps) {
   const [open, setOpen] = useState(false)
   const [editingId, setEditingId] = useState<number | null>(null)
   const [hoveredId, setHoveredId] = useState<number | null>(null)
+  const [statusDropdownId, setStatusDropdownId] = useState<number | null>(null)
+  const [updatingId, setUpdatingId] = useState<number | null>(null)
+  const statusDropdownRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (statusDropdownRef.current && !statusDropdownRef.current.contains(event.target as Node)) {
+        setStatusDropdownId(null)
+      }
+    }
+    if (statusDropdownId) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [statusDropdownId])
+
+  const handleStatusChange = async (projectId: number, newStatus: string) => {
+    if (!supabase) return
+    
+    setUpdatingId(projectId)
+    setStatusDropdownId(null)
+
+    try {
+      const { error } = await supabase
+        .from('projects')
+        .update({ status: newStatus })
+        .eq('id', projectId)
+
+      if (error) {
+        console.error('Error updating status:', error)
+      } else {
+        // Trigger parent to refetch projects
+        if (onProjectAdded) onProjectAdded()
+      }
+    } catch (err) {
+      console.error('Error updating status:', err)
+    } finally {
+      setUpdatingId(null)
+    }
+  }
 
   const handleEditProject = (projectId: number) => {
     setEditingId(projectId)
@@ -139,10 +184,108 @@ export function ProjectGrid({ projects, onProjectAdded }: ProjectGridProps) {
                     >
                       ✎
                     </button>
-                    <span className={`mc-badge ${s.cls}`}>
-                      <span style={{ width: 4, height: 4, borderRadius: '50%', background: s.dot, flexShrink: 0 }} />
-                      {s.label}
-                    </span>
+                    {/* Status badge - clickable with dropdown */}
+                    <div
+                      ref={statusDropdownId === p.id ? statusDropdownRef : null}
+                      style={{ position: 'relative' }}
+                    >
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setStatusDropdownId(statusDropdownId === p.id ? null : p.id)
+                        }}
+                        disabled={updatingId === p.id}
+                        className="mc-mono"
+                        style={{
+                          fontSize: 9,
+                          padding: '4px 8px',
+                          color: s.dot,
+                          border: `1px solid ${s.dot}40`,
+                          borderRadius: '4px',
+                          background: `${s.dot}08`,
+                          cursor: updatingId === p.id ? 'not-allowed' : 'pointer',
+                          transition: 'all 0.15s',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 4,
+                          opacity: updatingId === p.id ? 0.6 : 1,
+                        }}
+                        onMouseEnter={(e) => {
+                          if (updatingId !== p.id) {
+                            const elem = e.currentTarget as HTMLButtonElement
+                            elem.style.background = `${s.dot}12`
+                            elem.style.borderColor = `${s.dot}80`
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          const elem = e.currentTarget as HTMLButtonElement
+                          elem.style.background = `${s.dot}08`
+                          elem.style.borderColor = `${s.dot}40`
+                        }}
+                        title="Click to change status"
+                      >
+                        <span style={{ width: 4, height: 4, borderRadius: '50%', background: s.dot, flexShrink: 0 }} />
+                        {s.label}
+                      </button>
+
+                      {/* Status dropdown menu */}
+                      {statusDropdownId === p.id && (
+                        <div
+                          style={{
+                            position: 'absolute',
+                            right: 0,
+                            marginTop: 2,
+                            background: '#18181b',
+                            border: '1px solid #27272a',
+                            borderRadius: '6px',
+                            zIndex: 1000,
+                            minWidth: 100,
+                            overflow: 'hidden',
+                            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)',
+                          }}
+                        >
+                          {STATUS_OPTIONS.map((option) => {
+                            const optionStatus = STATUS_MAP[option]
+                            return (
+                              <button
+                                key={option}
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleStatusChange(p.id, option)
+                                }}
+                                style={{
+                                  width: '100%',
+                                  padding: '6px 10px',
+                                  background: p.status === option ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
+                                  border: 'none',
+                                  color: optionStatus.dot,
+                                  fontSize: 11,
+                                  fontWeight: 500,
+                                  cursor: 'pointer',
+                                  fontFamily: 'JetBrains Mono, monospace',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: 4,
+                                  transition: 'background 0.15s',
+                                  borderBottom: option !== STATUS_OPTIONS[STATUS_OPTIONS.length - 1] ? '1px solid #27272a' : 'none',
+                                  textAlign: 'left',
+                                }}
+                                onMouseEnter={(e) => {
+                                  (e.currentTarget as HTMLButtonElement).style.background = 'rgba(59, 130, 246, 0.08)'
+                                }}
+                                onMouseLeave={(e) => {
+                                  (e.currentTarget as HTMLButtonElement).style.background = p.status === option ? 'rgba(59, 130, 246, 0.1)' : 'transparent'
+                                }}
+                              >
+                                <span style={{ width: 4, height: 4, borderRadius: '50%', background: optionStatus.dot, flexShrink: 0 }} />
+                                {option.charAt(0).toUpperCase() + option.slice(1)}
+                                {p.status === option && <span style={{ marginLeft: 'auto', fontSize: 9 }}>✓</span>}
+                              </button>
+                            )
+                          })}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
 
