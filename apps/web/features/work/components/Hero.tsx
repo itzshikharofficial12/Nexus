@@ -39,13 +39,14 @@ export function Hero({ goal, onGoalChange, projects = [] }: HeroProps) {
   const [statusDropdownOpen, setStatusDropdownOpen] = useState(false)
   const [currentStatus, setCurrentStatus] = useState<string>('')
   const [isSavingStatus, setIsSavingStatus] = useState(false)
+  const [statusHighlight, setStatusHighlight] = useState(false)
   const statusDropdownRef = useRef<HTMLDivElement>(null)
 
   const STATUS_OPTIONS = ['planned', 'active', 'review']
   const STATUS_COLORS: Record<string, { bg: string; text: string; dot: string }> = {
-    active: { bg: 'rgba(59, 130, 246, 0.1)', text: '#3b82f6', dot: '#3b82f6' },
-    review: { bg: 'rgba(245, 158, 11, 0.1)', text: '#f59e0b', dot: '#f59e0b' },
-    planned: { bg: 'rgba(82, 82, 91, 0.1)', text: '#a1a1aa', dot: '#52525b' },
+    active: { bg: 'rgba(34, 197, 94, 0.12)', text: '#22c55e', dot: '#22c55e' },
+    review: { bg: 'rgba(59, 130, 246, 0.12)', text: '#3b82f6', dot: '#3b82f6' },
+    planned: { bg: 'rgba(113, 113, 122, 0.08)', text: '#a1a1aa', dot: '#71717a' },
   }
 
   // Close dropdown when clicking outside
@@ -140,6 +141,10 @@ export function Hero({ goal, onGoalChange, projects = [] }: HeroProps) {
     setCurrentStatus(newStatus)
     setStatusDropdownOpen(false)
     setIsSavingStatus(true)
+    setStatusHighlight(true)
+    
+    // Reset highlight after animation
+    setTimeout(() => setStatusHighlight(false), 600)
 
     try {
       const { error } = await supabase
@@ -358,20 +363,24 @@ export function Hero({ goal, onGoalChange, projects = [] }: HeroProps) {
                   disabled={isSavingStatus}
                   style={{
                     padding: '8px 12px',
-                    background: STATUS_COLORS[currentStatus]?.bg || 'rgba(82, 82, 91, 0.1)',
-                    border: `1px solid ${STATUS_COLORS[currentStatus]?.dot || '#52525b'}40`,
+                    background: STATUS_COLORS[currentStatus]?.bg || 'rgba(113, 113, 122, 0.08)',
+                    border: `1px solid ${STATUS_COLORS[currentStatus]?.dot || '#52525b'}${statusHighlight ? '80' : '40'}`,
                     borderRadius: '6px',
                     color: STATUS_COLORS[currentStatus]?.text || '#a1a1aa',
                     fontSize: 11,
                     fontWeight: 500,
                     cursor: isSavingStatus ? 'not-allowed' : 'pointer',
-                    transition: 'all 0.2s',
+                    transition: 'all 150ms ease-out',
                     fontFamily: 'JetBrains Mono, monospace',
                     display: 'flex',
                     alignItems: 'center',
                     gap: 4,
-                    opacity: isSavingStatus ? 0.6 : 1,
+                    opacity: isSavingStatus ? 0.6 : statusHighlight ? 0.9 : 1,
                     whiteSpace: 'nowrap',
+                    transform: statusHighlight ? 'scale(1.05)' : 'scale(1)',
+                    boxShadow: statusHighlight 
+                      ? `0 0 8px ${STATUS_COLORS[currentStatus]?.dot || '#52525b'}40`
+                      : 'none',
                   }}
                   title="Click to change status"
                 >
